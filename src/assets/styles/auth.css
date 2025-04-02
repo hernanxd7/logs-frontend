@@ -1,0 +1,156 @@
+/* Auth Styles - Login and Register */
+.auth-container {
+  min-height: 100vh;
+  width: 100%;
+  background-color: #6c63ff; /* Your purple color */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+/* Add or update these styles */
+/* Estilos básicos para el cuerpo y HTML */
+body, html {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+/* Contenedor principal */
+.auth-container {
+  min-height: 100vh;
+  width: 100vw;
+  background-color: #6c63ff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0;
+  margin: 0;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+/* Tarjeta de autenticación */
+.auth-card {
+  width: 320px;
+  background-color: #f8f9fa;
+  border-radius: 15px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+/* Títulos */
+h2 {
+  font-size: 20px;
+  text-align: center;
+  margin-top: 0;
+  margin-bottom: 15px;
+  color: #333;
+}
+
+/* Grupos de formulario */
+.form-group {
+  margin-bottom: 12px;
+  position: relative;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 4px;
+  color: #555;
+  font-weight: 500;
+  font-size: 13px;
+  text-align: center;
+}
+
+.form-group input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 8px 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 13px;
+  background-color: white;
+}
+
+/* Selector */
+select {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 8px 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  background-color: white;
+  font-size: 13px;
+  margin-bottom: 5px;
+}
+
+/* Botón de autenticación */
+.auth-button {
+  width: 100%;
+  background-color: #6c63ff;
+  color: white;
+  border: none;
+  padding: 8px 10px;
+  border-radius: 5px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+/* Enlaces */
+.auth-links, .auth-footer {
+  text-align: center;
+  margin-top: 12px;
+  font-size: 13px;
+  color: #666;
+}
+
+.auth-links a, .auth-footer a {
+  color: #6c63ff;
+  text-decoration: none;
+}
+
+/* Mensaje de error */
+.error-message {
+  color: #e74c3c;
+  font-size: 13px;
+  text-align: center;
+  margin-top: 5px;
+}
+
+/* Contenedor QR */
+.qr-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 10px 0;
+}
+
+.qr-container img {
+  max-width: 180px;
+  margin-bottom: 10px;
+}
+
+.qr-container p {
+  color: #555;
+  text-align: center;
+  font-size: 13px;
+}
+
+/* Estilos responsivos */
+@media (max-width: 480px) {
+  .auth-card {
+    width: 85%;
+    padding: 15px;
+  }
+}
