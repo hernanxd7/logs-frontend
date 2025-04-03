@@ -13,10 +13,8 @@ export default defineConfig({
     strictPort: true,
     host: true
   },
-  // Agregar esta configuración para el manejo de rutas
-  preview: {
-    port: 3030,
-    strictPort: true,
-    host: true
-  }
+  // Add this configuration
+  base: '/',
+  // Add this for SPA routing
+  appType: 'spa'
 })
