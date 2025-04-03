@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route } from 'react-router-dom';
 import Login from './assets/components/Login';
 import Register from './assets/components/Register';
 import Home from './assets/components/Home';
@@ -10,11 +10,11 @@ function App() {
   return (
     <Router>
       <Routes>
+        <Route path="/" element={<Login />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/home" element={<Home />} />
         <Route path="/logs" element={<Logs />} />
-        <Route path="/" element={<Navigate to="/login" />} />
       </Routes>
     </Router>
   );
