@@ -1,36 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { 
-  Chart as ChartJS, 
-  CategoryScale, 
-  LinearScale, 
-  BarElement, 
-  Title, 
-  Tooltip, 
-  Legend,
-  ArcElement,
-  PointElement,
-  LineElement,
-  TimeScale
-} from 'chart.js';
 import { Bar, Pie, Line } from 'react-chartjs-2';
-import 'chartjs-adapter-date-fns';
-import '../styles/logs.css';
-
-// Registrar los componentes necesarios para Chart.js
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  ArcElement,
-  PointElement,
-  LineElement,
-  TimeScale,
-  Title,
-  Tooltip,
-  Legend
-);
+import { BASE_URL } from '../../config/api';
 
 function Logs() {
   const [logData, setLogData] = useState(null);
@@ -44,10 +16,10 @@ function Logs() {
   const [activeTab, setActiveTab] = useState('bar');
   const navigate = useNavigate();
 
-  // URLs de los servidores
+  // URLs de los servidores usando la configuración centralizada
   const serverUrls = {
-    server1: 'http://localhost:3000', // Servidor con Rate Limit
-    server2: 'http://localhost:3001'  // Servidor sin Rate Limit
+    server1: 'http://localhost:3000', // Servidor con Rate Limit - Esto debería actualizarse también
+    server2: BASE_URL  // Servidor sin Rate Limit
   };
 
   useEffect(() => {
@@ -61,8 +33,8 @@ function Logs() {
     // Configurar el token en los headers de axios
     axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
     
-    // Usar siempre el servidor 2 (sin rate limit)
-    const serverUrl = 'http://localhost:3001';
+    // Usar la URL de la API desde la configuración centralizada
+    const serverUrl = BASE_URL;
     
     const fetchData = async () => {
       try {

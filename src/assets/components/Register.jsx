@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import '../styles/auth.css';
+import { BASE_URL } from '../../config/api';
 
 function Register() {
   const [email, setEmail] = useState('');
@@ -13,8 +13,8 @@ function Register() {
   const [qrCode, setQrCode] = useState('');
   const navigate = useNavigate();
 
-  // URL del servidor - Usando solo el servidor sin rate limit
-  const serverUrl = 'http://localhost:3001';  // Servidor sin Rate Limit
+  // Usar la URL de la API desde la configuración centralizada
+  const serverUrl = BASE_URL;
 
   const handleSubmit = async (e) => {
     e.preventDefault();

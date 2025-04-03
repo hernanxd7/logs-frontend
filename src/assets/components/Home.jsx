@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import '../styles/home.css';
+import { BASE_URL } from '../../config/api';
 
 function Home() {
   const [userData, setUserData] = useState(null);
@@ -45,8 +45,8 @@ function Home() {
     // Configurar el token en los headers de axios
     axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
     
-    // Usar siempre el servidor 2 (sin rate limit)
-    const serverUrl = 'http://localhost:3001';
+    // Usar la URL de la API desde la configuración centralizada
+    const serverUrl = BASE_URL;
     
     const fetchUserData = async () => {
       try {
