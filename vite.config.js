@@ -1,28 +1,36 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react-swc'
 
-// https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
   build: {
     outDir: 'dist',
-    minify: 'esbuild', // Using esbuild for faster builds
+    minify: 'esbuild',
     sourcemap: false,
     rollupOptions: {
       output: {
         manualChunks: {
-          vendor: ['react', 'react-dom'], // Separate vendor chunks for better caching
-        }
+          vendor: ['react', 'react-dom'],
+        },
+        assetFileNames: (assetInfo) => {
+          let extType = assetInfo.name.split('.').at(1);
+          if (/png|jpe?g|svg|gif|tiff|bmp|ico/i.test(extType)) {
+            extType = 'img';
+          }
+          return `assets/${extType}/[name]-[hash][extname]`;
+        },
+        chunkFileNames: 'assets/js/[name]-[hash].js',
+        entryFileNames: 'assets/js/[name]-[hash].js',
       }
     }
   },
   server: {
-    port: 3030, // Keeping your original port
+    port: 3030,
     strictPort: true,
-    host: true, // Needed for external access in development
+    host: true,
     proxy: {
       '/api': {
-        target: 'http://localhost:10000', // Your backend server
+        target: 'http://localhost:3001',
         changeOrigin: true,
         secure: false,
       }

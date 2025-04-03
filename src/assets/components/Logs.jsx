@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Bar, Pie, Line } from 'react-chartjs-2';
 import { BASE_URL } from '../../config/api';
+import '../styles/logs.css'; // Asegúrate de que esta línea esté presente
 
 function Logs() {
   const [logData, setLogData] = useState(null);
