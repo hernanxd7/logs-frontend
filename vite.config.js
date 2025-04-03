@@ -6,7 +6,7 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     minify: 'esbuild',
-    sourcemap: false,
+    sourcemap: true, // Habilitamos sourcemaps para desarrollo
     rollupOptions: {
       output: {
         manualChunks: {
@@ -16,6 +16,8 @@ export default defineConfig({
           let extType = assetInfo.name.split('.').at(1);
           if (/png|jpe?g|svg|gif|tiff|bmp|ico/i.test(extType)) {
             extType = 'img';
+          } else if (/css/i.test(extType)) {
+            extType = 'css';
           }
           return `assets/${extType}/[name]-[hash][extname]`;
         },
@@ -23,6 +25,14 @@ export default defineConfig({
         entryFileNames: 'assets/js/[name]-[hash].js',
       }
     }
+  },
+  css: {
+    // Configuración específica para CSS
+    modules: {
+      localsConvention: 'camelCase',
+      scopeBehaviour: 'local',
+    },
+    devSourcemap: true
   },
   server: {
     port: 3030,

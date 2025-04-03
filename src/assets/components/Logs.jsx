@@ -1,9 +1,37 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  BarElement,
+  ArcElement,
+  Title,
+  Tooltip,
+  Legend,
+  TimeScale
+} from 'chart.js';
 import { Bar, Pie, Line } from 'react-chartjs-2';
+import 'chartjs-adapter-date-fns';
 import { BASE_URL } from '../../config/api';
 import '../styles/logs.css'; // Asegúrate de que esta línea esté presente
+
+// Registrar los componentes necesarios de Chart.js
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  BarElement,
+  ArcElement,
+  Title,
+  Tooltip,
+  Legend,
+  TimeScale
+);
 
 function Logs() {
   const [logData, setLogData] = useState(null);
