@@ -36,20 +36,18 @@ ChartJS.register(
 function Logs() {
   const [logData, setLogData] = useState(null);
   const [hourlyData, setHourlyData] = useState(null);
-  const [failedLogins, setFailedLogins] = useState([]);
+  // Agregar nuevo estado para los datos de métodos HTTP
+  const [methodsData, setMethodsData] = useState({
+    server1: { GET: 0, POST: 0, PUT: 0, DELETE: 0, OTHER: 0 },
+    server2: { GET: 0, POST: 0, PUT: 0, DELETE: 0, OTHER: 0 }
+  });
+  // Agregar estados para controlar las actualizaciones
+  const [lastHourlyUpdate, setLastHourlyUpdate] = useState(0);
+  const [lastMethodsUpdate, setLastMethodsUpdate] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [selectedServer, setSelectedServer] = useState('server1');
-  const [testResult, setTestResult] = useState(null);
-  const [testLoading, setTestLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('bar');
   const navigate = useNavigate();
-
-  // URLs de los servidores usando la configuración centralizada
-  const serverUrls = {
-    server1: 'http://localhost:3000', // Servidor con Rate Limit - Esto debería actualizarse también
-    server2: BASE_URL  // Servidor sin Rate Limit
-  };
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -73,13 +71,24 @@ function Logs() {
         const logsResponse = await axios.get(`${serverUrl}/logs`);
         setLogData(logsResponse.data);
         
-        // Obtener datos por hora
-        const hourlyResponse = await axios.get(`${serverUrl}/logs/hourly`);
-        setHourlyData(hourlyResponse.data);
+        // Obtener datos por hora - reducir frecuencia
+        if (!hourlyData || Date.now() - lastHourlyUpdate > 60000) { // Actualizar cada minuto
+          const hourlyResponse = await axios.get(`${serverUrl}/logs/hourly`);
+          setHourlyData(hourlyResponse.data);
+          setLastHourlyUpdate(Date.now());
+        }
         
-        // Obtener usuarios con intentos fallidos
-        const failedLoginsResponse = await axios.get(`${serverUrl}/logs/failed-logins`);
-        setFailedLogins(failedLoginsResponse.data);
+        // Obtener datos de métodos HTTP - reducir frecuencia
+        if (!methodsData.server1.GET || Date.now() - lastMethodsUpdate > 300000) { // Actualizar cada 5 minutos
+          const methodsResponse1 = await axios.get('http://localhost:3000/logs/methods');
+          const methodsResponse2 = await axios.get('http://localhost:3001/logs/methods');
+          
+          setMethodsData({
+            server1: methodsResponse1.data || { GET: 0, POST: 0, PUT: 0, DELETE: 0, OTHER: 0 },
+            server2: methodsResponse2.data || { GET: 0, POST: 0, PUT: 0, DELETE: 0, OTHER: 0 }
+          });
+          setLastMethodsUpdate(Date.now());
+        }
         
         setLoading(false);
       } catch (error) {
@@ -98,84 +107,13 @@ function Logs() {
     };
 
     fetchData();
+    // Aumentar el intervalo de actualización a 30 segundos en lugar de 5
+    const interval = setInterval(fetchData, 30000);
+    return () => clearInterval(interval);
   }, [navigate]);
 
   const handleBack = () => {
     navigate('/home');
-  };
-
-  // Función para probar el servidor seleccionado
-  const testServer = async () => {
-    setTestLoading(true);
-    setTestResult(null);
-    
-    try {
-      const startTime = Date.now();
-      const requests = [];
-      
-      // Realizar 10 peticiones al servidor seleccionado
-      for (let i = 0; i < 10; i++) {
-        requests.push(axios.get(`${serverUrls[selectedServer]}/ping`));
-      }
-      
-      await Promise.all(requests);
-      const endTime = Date.now();
-      
-      setTestResult({
-        success: true,
-        message: `Prueba completada exitosamente en ${endTime - startTime}ms`,
-        server: selectedServer === 'server1' ? 'Servidor 1 (con Rate Limit)' : 'Servidor 2 (sin Rate Limit)'
-      });
-    } catch (error) {
-      setTestResult({
-        success: false,
-        message: error.response?.data?.message || 'Error al probar el servidor',
-        server: selectedServer === 'server1' ? 'Servidor 1 (con Rate Limit)' : 'Servidor 2 (sin Rate Limit)'
-      });
-    } finally {
-      setTestLoading(false);
-    }
-  };
-
-  // Función para simular un ataque de fuerza bruta
-  const simulateBruteForce = async () => {
-    setTestLoading(true);
-    setTestResult(null);
-    
-    try {
-      const startTime = Date.now();
-      const requests = [];
-      
-      // Realizar 50 peticiones al servidor seleccionado
-      for (let i = 0; i < 50; i++) {
-        requests.push(
-          axios.post(`${serverUrls[selectedServer]}/login`, {
-            email: `test${i}@example.com`,
-            password: 'wrongpassword'
-          }).catch(err => {
-            // Ignorar errores individuales para continuar con las peticiones
-            return { status: err.response?.status || 500 };
-          })
-        );
-      }
-      
-      await Promise.all(requests);
-      const endTime = Date.now();
-      
-      setTestResult({
-        success: true,
-        message: `Simulación completada en ${endTime - startTime}ms. Se enviaron 50 peticiones.`,
-        server: selectedServer === 'server1' ? 'Servidor 1 (con Rate Limit)' : 'Servidor 2 (sin Rate Limit)'
-      });
-    } catch (error) {
-      setTestResult({
-        success: false,
-        message: error.response?.data?.message || 'Error al simular ataque',
-        server: selectedServer === 'server1' ? 'Servidor 1 (con Rate Limit)' : 'Servidor 2 (sin Rate Limit)'
-      });
-    } finally {
-      setTestLoading(false);
-    }
   };
 
   // Configuración para el gráfico de barras comparativo
@@ -243,6 +181,39 @@ function Logs() {
         tension: 0.4,
         fill: true,
       }
+    ],
+  };
+
+  // Configuración para el gráfico de métodos HTTP
+  const methodsChartData = {
+    labels: ['GET', 'POST', 'PUT', 'DELETE', 'OTROS'],
+    datasets: [
+      {
+        label: 'Servidor 1 (con Rate Limit)',
+        data: [
+          methodsData.server1.GET || 0,
+          methodsData.server1.POST || 0,
+          methodsData.server1.PUT || 0,
+          methodsData.server1.DELETE || 0,
+          methodsData.server1.OTHER || 0
+        ],
+        backgroundColor: 'rgba(54, 162, 235, 0.6)',
+        borderColor: 'rgba(54, 162, 235, 1)',
+        borderWidth: 1,
+      },
+      {
+        label: 'Servidor 2 (sin Rate Limit)',
+        data: [
+          methodsData.server2.GET || 0,
+          methodsData.server2.POST || 0,
+          methodsData.server2.PUT || 0,
+          methodsData.server2.DELETE || 0,
+          methodsData.server2.OTHER || 0
+        ],
+        backgroundColor: 'rgba(255, 99, 132, 0.6)',
+        borderColor: 'rgba(255, 99, 132, 1)',
+        borderWidth: 1,
+      },
     ],
   };
 
@@ -318,6 +289,27 @@ function Logs() {
     }
   };
 
+  const methodsChartOptions = {
+    responsive: true,
+    plugins: {
+      legend: {
+        position: 'top',
+      },
+      title: {
+        display: true,
+        text: 'Tipos de Peticiones HTTP',
+      },
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        ticks: {
+          precision: 0
+        }
+      }
+    }
+  };
+
   if (loading) {
     return (
       <div className="logs-container">
@@ -353,49 +345,6 @@ function Logs() {
         <p><strong>Servidor 2:</strong> No implementa Rate Limit</p>
       </div>
 
-      {/* Sección para interactuar con los servidores */}
-      <div className="server-interaction">
-        <h2>Interacción con Servidores</h2>
-        
-        <div className="server-selector">
-          <label htmlFor="server-select">Seleccionar servidor:</label>
-          <select 
-            id="server-select" 
-            value={selectedServer} 
-            onChange={(e) => setSelectedServer(e.target.value)}
-          >
-            <option value="server1">Servidor 1 (con Rate Limit)</option>
-            <option value="server2">Servidor 2 (sin Rate Limit)</option>
-          </select>
-        </div>
-        
-        <div className="server-actions">
-          <button 
-            className="action-button test-button" 
-            onClick={testServer}
-            disabled={testLoading}
-          >
-            {testLoading ? 'Probando...' : 'Probar Servidor'}
-          </button>
-          
-          <button 
-            className="action-button simulate-button" 
-            onClick={simulateBruteForce}
-            disabled={testLoading}
-          >
-            {testLoading ? 'Simulando...' : 'Simular Ataque de Fuerza Bruta'}
-          </button>
-        </div>
-        
-        {testResult && (
-          <div className={`test-result ${testResult.success ? 'success' : 'error'}`}>
-            <h3>Resultado de la prueba</h3>
-            <p><strong>Servidor:</strong> {testResult.server}</p>
-            <p><strong>Resultado:</strong> {testResult.message}</p>
-          </div>
-        )}
-      </div>
-
       {/* Pestañas para diferentes tipos de gráficos */}
       <div className="chart-wrapper">
         <div className="chart-tabs">
@@ -417,6 +366,12 @@ function Logs() {
           >
             Actividad por Hora
           </div>
+          <div 
+            className={`chart-tab ${activeTab === 'methods' ? 'active' : ''}`}
+            onClick={() => setActiveTab('methods')}
+          >
+            Métodos HTTP
+          </div>
         </div>
 
         {activeTab === 'bar' && (
@@ -436,42 +391,12 @@ function Logs() {
             <Line data={lineChartData} options={lineChartOptions} />
           </div>
         )}
-      </div>
 
-      {/* Tabla de usuarios con más intentos fallidos */}
-      <div className="chart-wrapper">
-        <h2>Usuarios con más intentos fallidos de login</h2>
-        
-        <div className="users-table-container">
-          <table className="users-table">
-            <thead>
-              <tr>
-                <th>Email</th>
-                <th>Intentos fallidos</th>
-                <th>Último intento</th>
-                <th>Servidor</th>
-              </tr>
-            </thead>
-            <tbody>
-              {failedLogins.length > 0 ? (
-                failedLogins.map((user, index) => (
-                  <tr key={index}>
-                    <td>{user.email}</td>
-                    <td className={user.attempts > 5 ? 'high-attempts' : ''}>
-                      {user.attempts}
-                    </td>
-                    <td>{new Date(user.lastAttempt).toLocaleString()}</td>
-                    <td>{user.server === 'server1' ? 'Servidor 1 (con Rate Limit)' : 'Servidor 2 (sin Rate Limit)'}</td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="4" style={{ textAlign: 'center' }}>No hay datos de intentos fallidos</td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+        {activeTab === 'methods' && (
+          <div className="chart">
+            <Bar data={methodsChartData} options={methodsChartOptions} />
+          </div>
+        )}
       </div>
 
       {/* Resumen de logs por servidor */}

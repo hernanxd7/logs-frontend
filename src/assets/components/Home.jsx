@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { BASE_URL } from '../../config/api';
-import '../styles/home.css'
+import '../styles/home.css';
 
 function Home() {
   const [userData, setUserData] = useState(null);
@@ -103,70 +103,119 @@ function Home() {
   }
 
   return (
-    <div className="home-container">
-      <div className="home-header">
-        <h1>Bienvenido, {userData?.username}</h1>
-        <div className="header-buttons">
-          <button onClick={handleViewLogs} className="view-logs-button">
-            Ver Logs
-          </button>
-          <button onClick={handleLogout} className="logout-button">
-            Cerrar sesión
-          </button>
+    <div className="dashboard-container">
+      <header className="dashboard-header">
+        <div className="header-left">
+          <div className="logo">
+            <span className="logo-icon">⌊∕</span>
+            LogMonitor
+          </div>
         </div>
-      </div>
+        <nav className="header-nav">
+          <button className="nav-item active">Dashboard</button>
+          <button className="nav-item">Configuración</button>
+          <button onClick={handleViewLogs} className="nav-item">Ver Logs</button>
+        </nav>
+        <div className="header-right">
+          <div className="user-menu">
+            <span className="user-avatar">H</span>
+            <span className="user-name">Bienvenido, {userData?.username}</span>
+            <button onClick={handleLogout} className="logout-button">
+              Cerrar sesión
+            </button>
+          </div>
+        </div>
+      </header>
 
-      
+      <main className="dashboard-content">
+        <div className="info-grid">
+          <div className="info-card user-info">
+            <div className="card-header">
+              <h2>Información del usuario</h2>
+              <span className="card-icon">👤</span>
+            </div>
+            <div className="card-content">
+              <div className="info-item">
+                <label>Nombre de usuario:</label>
+                <span>{userData?.username}</span>
+              </div>
+              <div className="info-item">
+                <label>Correo electrónico:</label>
+                <span>{userData?.email}</span>
+              </div>
+              <div className="info-item">
+                <label>Fecha de registro:</label>
+                <span>{userData?.createdAt?.toDate?.().toLocaleString() || 'No disponible'}</span>
+              </div>
+            </div>
+          </div>
 
-      <div className="user-info-card">
-        <h2>Información del usuario</h2>
-        <div className="user-info-item">
-          <strong>Nombre de usuario:</strong> {userData?.username}
-        </div>
-        <div className="user-info-item">
-          <strong>Correo electrónico:</strong> {userData?.email}
-        </div>
-        <div className="user-info-item">
-          <strong>Fecha de registro:</strong> {userData?.createdAt?.toDate?.().toLocaleString() || 'No disponible'}
-        </div>
-      </div>
+          <div className="info-card student-info">
+            <div className="card-header">
+              <h2>Información del alumno</h2>
+              <span className="card-icon">📚</span>
+            </div>
+            <div className="card-content">
+              <div className="info-item">
+                <label>Nombre:</label>
+                <span>{infoEstatica.alumno.nombre}</span>
+              </div>
+              <div className="info-item">
+                <label>Grupo:</label>
+                <span>{infoEstatica.alumno.grupo}</span>
+              </div>
+            </div>
+          </div>
 
-      <div className="user-info-card">
-        <h2>Información del alumno</h2>
-        <div className="user-info-item">
-          <strong>Nombre:</strong> {infoEstatica.alumno.nombre}
-        </div>
-        <div className="user-info-item">
-          <strong>Grupo:</strong> {infoEstatica.alumno.grupo}
-        </div>
-      </div>
+          <div className="info-card teacher-info">
+            <div className="card-header">
+              <h2>Información del docente</h2>
+              <span className="card-icon">👨‍🏫</span>
+            </div>
+            <div className="card-content">
+              <div className="info-item">
+                <label>Nombre:</label>
+                <span>{infoEstatica.docente.nombre}</span>
+              </div>
+            </div>
+          </div>
 
-      <div className="user-info-card">
-        <h2>Información del docente</h2>
-        <div className="user-info-item">
-          <strong>Nombre:</strong> {infoEstatica.docente.nombre}
-        </div>
-        {/* Eliminamos la referencia al grupo del docente ya que no existe */}
-      </div>
+          <div className="info-card system-info">
+            <div className="card-header">
+              <h2>{appInfo.nombre}</h2>
+              <span className="card-icon">🔒</span>
+            </div>
+            <div className="card-content">
+              <p className="system-description">{appInfo.descripcion}</p>
+              <h3>Características principales:</h3>
+              <ul className="feature-list">
+                {appInfo.caracteristicas.map((feature, index) => (
+                  <li key={index}>✓ {feature}</li>
+                ))}
+              </ul>
+            </div>
+          </div>
 
-      {/* Nueva tarjeta con información de la aplicación */}
-      <div className="user-info-card app-description">
-        <h2>{appInfo.nombre}</h2>
-        <p className="app-description-text">{appInfo.descripcion}</p>
-        <h3>Características principales:</h3>
-        <ul className="feature-list">
-          {appInfo.caracteristicas.map((feature, index) => (
-            <li key={index}>{feature}</li>
-          ))}
-        </ul>
-      </div>
-
-      <div className="user-info-card">
-        <h2>Información del sistema</h2>
-        <div className="user-info-item">
-          <strong>Versión de Node:</strong> {userData?.nodeVersion || 'No disponible'}
+          <div className="info-card version-info">
+            <div className="card-header">
+              <h2>Información del sistema</h2>
+              <span className="card-icon">⚙️</span>
+            </div>
+            <div className="card-content">
+              <div className="info-item">
+                <label>Versión de Node:</label>
+                <span>{userData?.nodeVersion || 'v22.13.1'}</span>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
+      </main>
+
+      <footer className="dashboard-footer">
+        <div className="footer-content">
+          <p>© 2025 LogMonitor. Todos los derechos reservados.</p>
+        </div>
+      </footer>
     </div>
   );
 }

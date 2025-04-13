@@ -10,6 +10,10 @@ function Login() {
   const [requireMFA, setRequireMFA] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [isRecoveryMode, setIsRecoveryMode] = useState(false);
+  const [recoveryStep, setRecoveryStep] = useState(1); // 1: email, 2: MFA, 3: nueva contraseña
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const navigate = useNavigate();
 
   // Usar la URL de la API desde la configuración centralizada
@@ -56,6 +60,153 @@ function Login() {
     }
   };
 
+  const handleRecoverySubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+
+    try {
+      if (recoveryStep === 1) {
+        // Verificar si el email existe
+        const response = await axios.post(`${serverUrl}/check-user`, { email });
+        if (response.data.exists) {
+          setRecoveryStep(2);
+        } else {
+          setError('No se encontró ninguna cuenta con ese correo electrónico');
+        }
+      } else if (recoveryStep === 2) {
+        // Verificar código MFA
+        const response = await axios.post(`${serverUrl}/verify-recovery-mfa`, {
+          email,
+          otp
+        });
+        
+        if (response.data.success) {
+          setRecoveryStep(3);
+        } else {
+          setError('Código de verificación inválido');
+        }
+      } else if (recoveryStep === 3) {
+        // Verificar que las contraseñas coincidan
+        if (newPassword !== confirmPassword) {
+          setError('Las contraseñas no coinciden');
+          setLoading(false);
+          return;
+        }
+        
+        // Actualizar contraseña
+        const response = await axios.post(`${serverUrl}/reset-password`, {
+          email,
+          otp,
+          newPassword
+        });
+        
+        if (response.data.success) {
+          alert('Contraseña actualizada correctamente');
+          setIsRecoveryMode(false);
+          setRecoveryStep(1);
+        } else {
+          setError('Error al actualizar la contraseña');
+        }
+      }
+    } catch (error) {
+      console.error('Error en recuperación:', error);
+      setError(error.response?.data?.message || 'Error en el proceso de recuperación');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Renderizado para el modo de recuperación
+  if (isRecoveryMode) {
+    return (
+      <div className="auth-container">
+        <div className="auth-card">
+          <h2>Recuperación de contraseña</h2>
+          
+          {error && <div className="error-message">{error}</div>}
+          
+          <form onSubmit={handleRecoverySubmit}>
+            {recoveryStep === 1 && (
+              <div className="form-group">
+                <label htmlFor="recovery-email">Correo electrónico</label>
+                <input
+                  type="email"
+                  id="recovery-email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </div>
+            )}
+            
+            {recoveryStep === 2 && (
+              <div className="form-group">
+                <label htmlFor="recovery-otp">Código de verificación</label>
+                <input
+                  type="text"
+                  id="recovery-otp"
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value)}
+                  placeholder="Ingresa el código de tu aplicación"
+                  required
+                />
+              </div>
+            )}
+            
+            {recoveryStep === 3 && (
+              <>
+                <div className="form-group">
+                  <label htmlFor="new-password">Nueva contraseña</label>
+                  <input
+                    type="password"
+                    id="new-password"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    required
+                  />
+                </div>
+                
+                <div className="form-group">
+                  <label htmlFor="confirm-password">Confirmar contraseña</label>
+                  <input
+                    type="password"
+                    id="confirm-password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    required
+                  />
+                </div>
+              </>
+            )}
+            
+            <button 
+              type="submit" 
+              className="auth-button"
+              disabled={loading}
+            >
+              {loading ? 'Procesando...' : 'Continuar'}
+            </button>
+          </form>
+          
+          <div className="auth-footer">
+            <button 
+              onClick={() => {
+                setIsRecoveryMode(false);
+                setRecoveryStep(1);
+                setError('');
+              }}
+              className="text-button"
+            >
+              Volver al inicio de sesión
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Renderizado normal para login
   return (
     <div className="auth-container">
       <div className="auth-card">
@@ -114,6 +265,13 @@ function Login() {
         {!requireMFA && (
           <div className="auth-footer">
             ¿No tienes una cuenta? <Link to="/register">Registrarse</Link>
+            <br />
+            <button 
+              onClick={() => setIsRecoveryMode(true)} 
+              className="text-button"
+            >
+              ¿Olvidaste tu contraseña?
+            </button>
           </div>
         )}
       </div>
