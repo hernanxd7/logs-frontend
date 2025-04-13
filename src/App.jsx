@@ -1,6 +1,6 @@
 import React from 'react';
 import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import Landing from './assets/components/landing';
+import Landing from './assets/components/landing'; // ✅ con mayúscula
 import Login from './assets/components/login';
 import Register from './assets/components/register';
 import Home from './assets/components/home';

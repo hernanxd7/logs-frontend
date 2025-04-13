@@ -12,9 +12,6 @@ function Landing() {
             Monitor de registro
           </Link>
           <div className="nav-links">
-            <Link to="#features" className="nav-link">Características</Link>
-            <Link to="#testimonials" className="nav-link">Testimonios</Link>
-            <Link to="#pricing" className="nav-link">Precios</Link>
             <Link to="/login" className="nav-link login">Iniciar sesión</Link>
             <Link to="/register" className="nav-button">Registrarse</Link>
           </div>
