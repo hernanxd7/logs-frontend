@@ -1,10 +1,10 @@
 import React from 'react';
 import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import Landing from './assets/components/landing'; // ✅ con mayúscula
-import Login from './assets/components/login';
-import Register from './assets/components/register';
-import Home from './assets/components/home';
-import Logs from './assets/components/logs';  // Cambiado a minúscula para coincidir con el archivo
+import Landing from './assets/components/landing';
+import Login from './assets/components/Login';
+import Register from './assets/components/Register';
+import Home from './assets/components/Home';
+import Logs from './assets/components/Logs';  // Cambiado a minúscula para coincidir con el archivo
 import './App.css';
 
 function App() {
